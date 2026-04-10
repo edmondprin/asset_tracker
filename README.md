@@ -13,7 +13,7 @@
 - OOP with all four pillars: classes/objects, encapsulation, inheritance, polymorphism.
 - Data validation via @property and setter, invalid status rejected at class level.
 - Inheritance hierarchy: Laptop and NetworkDevice extend a base Asset class.
-- JSON persistence — assets save on exit and reload on startup.
+- JSON persistence: Assets save on exit and reload on startup.
 - CLI menu with input handling and separation of concerns.
 
 ## Features
