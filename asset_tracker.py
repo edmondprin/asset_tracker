@@ -36,19 +36,35 @@ class Asset:
     def __str__(self):
         return f"{self.asset_id} | {self.name} | {self.category} | {self.status}"
     
+    def __repr__(self):
+        return f"Asset(asset_id={self.asset_id!r}, name={self.name!r}, category={self.category!r}, status={self.status!r})"
+    
     def get_summary(self):
         return f"{self.name} is a {self.category} currently {self.status} under asset ID {self.asset_id}"
     
-    def to_dict(self):
+    def to_dict(self): # instance method with self, reads an existing object
         return {"asset_id": self.asset_id, "name": self.name, "category": self.category, "status": self.status}
+    
+    @classmethod # classmethod with cls, creates a new object
+    def from_dict(cls, data):
+        asset_type = data.get("type", "Asset") # safer than data["key"] since returns "Asset" if "type" does not exist
+        if asset_type == "Laptop":
+            return Laptop(data["asset_id"], data["name"], data["category"], data["status"], data.get("assigned_user", "unassigned"))
+        elif asset_type == "NetworkDevice":
+            return NetworkDevice(data["asset_id"], data["name"], data["category"], data["status"], data.get("ip_address", "0.0.0.0"))
+        else:
+            return cls(data["asset_id"], data["name"], data["category"], data["status"])
 
     
-# parameters with defaults come after parameters without defaults:
+# parameters with defaults come after parameters without defaults. Keyword arguments bypass position entirely.
 
 class Laptop(Asset):
     def __init__(self, asset_id, name, category, status="available", assigned_user="unassigned"):
         super().__init__(asset_id, name, category, status)
         self.assigned_user = assigned_user
+
+    def to_dict(self):
+        return {"type": "Laptop", "asset_id": self.asset_id, "name": self.name, "category": self.category, "status": self.status, "assigned_user": self.assigned_user}
 
     def get_summary(self):
         # return super().get_summary()
@@ -62,6 +78,8 @@ class NetworkDevice(Asset):
     def get_summary(self):
         return f"{self.name} ({self.category}) with the following IP address: {self.ip_address} - status: {self.status}"
 
+    def to_dict(self):
+        return {"type": "NetworkDevice", "asset_id": self.asset_id, "name": self.name, "category": self.category, "status": self.status, "ip_address": self.ip_address}
 
 class AssetManager:
     def __init__(self):
@@ -78,16 +96,20 @@ class AssetManager:
         return "Asset not found."
 # return outside of for loop to check everything and not give up after first item
 
-    def save_to_file(self, filename): # flattens objects into dictionaries
+    def __len__(self):
+        return len(self.assets)
+
+    def save_to_file(self, filename): # flattens objects into dictionaries, as json does not accept objects
         data = [asset.to_dict() for asset in self.assets]
         with open(filename, "w") as f:
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
 
     def load_from_file(self, filename): # rebuilds objects from dictionaries
         with open(filename, "r") as f:
             data = json.load(f)
         for item in data:
-            asset = Asset(item["asset_id"], item["name"], item["category"], item["status"])
+            asset = Asset.from_dict(item)
+            # asset = Asset(item["asset_id"], item["name"], item["category"], item["status"])
             self.assets.append(asset)
 
 '''
@@ -118,12 +140,40 @@ def main():
         choice = input("Enter choice: ")
 
         if choice == "1":
-            asset_id = input("Enter the Asset ID: ")
-            name = input("Enter the asset name: ") 
-            category = input("Enter the asset category: ")
-            status = input("Enter the asset status: ")
-            new_asset = Asset(asset_id, name, category, status)
-            manager.add_asset(new_asset)
+            choices_list = ["asset", "laptop", "network device"]
+            while True:
+                print(f"Available options: {choices_list}")
+                user_pick = input("Select a category for your asset to add: ").strip().lower()
+                if user_pick in choices_list:
+                    if user_pick == choices_list[0]:
+                        asset_id = input("Enter the Asset ID: ")
+                        name = input("Enter the asset name: ") 
+                        category = input("Enter the asset category: ")
+                        status = input("Enter the asset status: ")
+                        new_asset = Asset(asset_id, name, category, status)
+                        manager.add_asset(new_asset)
+                        break
+                    elif user_pick == choices_list[1]:
+                        asset_id = input("Enter the Asset ID: ")
+                        name = input("Enter the laptop name: ")
+                        category = input("Enter the laptop category: ")
+                        status = input("Enter the laptop status: ")
+                        assigned_user = input("Enter the assigned user's name (first and last names): ")
+                        new_laptop = Laptop(asset_id, name, category, status, assigned_user)
+                        manager.add_asset(new_laptop)
+                        break
+                    elif user_pick == choices_list[2]:
+                        asset_id = input("Enter the Asset ID: ")
+                        name = input ("Enter the network device name: ")
+                        category = input("Enter the network device category: ")
+                        status = input("Enter the network device status: ")
+                        ip_address = input("Enter the network device IP Address: ")
+                        new_network_device = NetworkDevice(asset_id, name, category, status, ip_address)
+                        manager.add_asset(new_network_device)
+                        break
+                else:
+                    print("Make sure to make a valid choice.")
+                
         elif choice == "2":
             manager.list_assets()
         elif choice == "3":

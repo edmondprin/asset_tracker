@@ -1,0 +1,34 @@
+[
+    {
+        "asset_id": "A001",
+        "name": "Edmond's Mac",
+        "category": "laptop",
+        "status": "available"
+    },
+    {
+        "asset_id": "A002",
+        "name": "Maia's iPad",
+        "category": "tablet",
+        "status": "available"
+    },
+    {
+        "asset_id": "B098",
+        "name": "iPad Pro",
+        "category": "tablet",
+        "status": "assigned"
+    },
+    {
+        "asset_id": "B100",
+        "name": "Mac Pro",
+        "category": "Desk computer",
+        "status": "maintenance"
+    },
+    {
+        "type": "Laptop",
+        "asset_id": "A002",
+        "name": "Edmond's MBA",
+        "category": "portable",
+        "status": "assigned",
+        "assigned_user": "Edmond Prin"
+    }
+]
